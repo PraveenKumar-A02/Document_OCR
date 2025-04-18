@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document OCR and Translation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            min-height: 100vh;
+        }
+
+        #upload-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        input[type="file"]:hover,
+        select:hover {
+            border-color: #3498db;
+            background: #fff;
+        }
+
+        input[type="file"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+        }
+
+        button {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        #result {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #result h2 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 5px;
+        }
+
+        .lang-box {
+            border: 2px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f5f7fa, #e4e7eb);
+            color: #2c3e50;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-box:hover {
+            border-color: #e67e22;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+<div id="upload-form">
+    <h1>AI-Powered Document Digitalization System</h1>
+    <form id="ocrForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Select Document:</label>
+            <input type="file" id="file" name="file" accept="image/*" required>
+        </div>
+        <div class="form-group">
+            <label for="sourceLanguage">Document Language:</label>
+            <select id="sourceLanguage" name="sourceLanguage" required>
+                <option value="eng">English</option>
+                <option value="tam">Tamil</option>
+                <option value="tel">Telugu</option>
+                <option value="hin">Hindi</option>
+                <option value="jpn">Japanese</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="targetLanguage">Translate to:</label>
+            <select id="targetLanguage" name="targetLanguage" required>
+                <option value="eng">English</option>
+                <option value="tam">Tamil</option>
+                <option value="tel">Telugu</option>
+                <option value="hin">Hindi</option>
+                <option value="jpn">Japanese</option>
+            </select>
+        </div>
+        <button type="submit">Process Document</button>
+    </form>
+</div>
+
+<div id="result" style="display:none;">
+    <h2>Results:</h2>
+    <div id="originalText" class="lang-box"></div>
+    <div id="translatedText" class="lang-box"></div>
+</div>
+
+<script>
+    document.getElementById('ocrForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const file = document.getElementById('file').files[0];
+        const sourceLang = document.getElementById('sourceLanguage').value;
+        const targetLang = document.getElementById('targetLanguage').value;
+
+        if (!file) {
+            alert('Please select a file!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('sourceLanguage', sourceLang);
+        formData.append('targetLanguage', targetLang);
+
+        fetch('/api/documents/process', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('originalText').innerText = `Original Text (${sourceLang}): ${data.original}`;
+                document.getElementById('translatedText').innerText = `Translated to ${targetLang}: ${data.translated}`;
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
+</body>
+</html>
